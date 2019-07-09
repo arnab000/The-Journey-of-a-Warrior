@@ -22,14 +22,29 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.demo.game.Demo;
 import com.demo.game.Scenes.Hud;
+import com.demo.game.Sprites.Enemy;
 import com.demo.game.Sprites.Warrior;
 import com.demo.game.Tools.B2WorldCreator;
+import com.demo.game.Tools.Collision;
+import com.demo.game.Tools.WorldContactListener;
+
 
 public class PlayScreen implements Screen {
 
-
+    private long countDt=0;
+    private float timeCount=0;
+    private long Timer=1;
     private Demo game ;
     public Warrior player;
+    public Warrior warrior1;
+    public Enemy enemy;
+    public Collision collision;
+    public boolean bool;
+    public boolean isHurt=false;
+    public boolean enemyisHurt=false;
+
+    public int k=1;
+
 
 
 
@@ -42,7 +57,7 @@ public class PlayScreen implements Screen {
     private OrthogonalTiledMapRenderer renderer;
      //Box2d variables
     private World world;
-    private Box2DDebugRenderer b2dr;
+   private Box2DDebugRenderer b2dr;
 
 
 
@@ -56,31 +71,79 @@ public class PlayScreen implements Screen {
         gamePort= new FitViewport(Demo.V_Width,Demo.V_Height,gamecam);
         hud=new Hud(game.batch);
         mapLoader =new TmxMapLoader();
-        map=mapLoader.load("map_l1.tmx");
+        map=mapLoader.load("Gothic_map.tmx");
         renderer= new OrthogonalTiledMapRenderer(map);
         gamecam.position.set(gamePort.getWorldWidth()/2,gamePort.getWorldHeight()/2,0);
-
+        bool=false;
+       collision= new Collision();
        world =new World (new Vector2(0,-150),true);
        b2dr= new Box2DDebugRenderer();
        new B2WorldCreator(world,map);
+       enemy= new Enemy(world,this,200);
         player= new Warrior(world,this);
-
+        warrior1= new Warrior(world,this);
+       // world.setContactListener(new WorldContactListener());
 
     }
+
 
     @java.lang.Override
     public void show() {
 
     }
     public void handleInput(float dt){
+        timeCount+=dt;
+        if(timeCount>=1){
+            Timer++;
+            timeCount=0;
+        }
+        countDt++;
+        countDt=countDt%500;
         if(Gdx.input.isKeyJustPressed(Input.Keys.UP))
-            player.b2body.applyLinearImpulse(new Vector2(0, 150f), player.b2body.getWorldCenter(), true);
+            player.b2body.applyLinearImpulse(new Vector2(0, 153f), player.b2body.getWorldCenter(), true);
 
-            if(Gdx.input.isKeyPressed(Input.Keys.RIGHT) && player.b2body.getLinearVelocity().x<=40)
-                player.b2body.applyLinearImpulse(new Vector2(17f,0),player.b2body.getWorldCenter(),true);
+            if(Gdx.input.isKeyPressed(Input.Keys.RIGHT) && player.b2body.getLinearVelocity().x<=36 &&( ((enemy.b2body.getPosition().x-player.b2body.getPosition().x)>=35 ||enemy.Hurt==true)||((enemy.b2body.getPosition().x-player.b2body.getPosition().x)>=35 ||enemy.Hurt==true)))
+                player.b2body.applyLinearImpulse(new Vector2(21f,0),player.b2body.getWorldCenter(),true);
 
-            if(Gdx.input.isKeyPressed(Input.Keys.LEFT) && player.b2body.getLinearVelocity().x>=-40 )
-                player.b2body.applyLinearImpulse(new Vector2(-17f,0),player.b2body.getWorldCenter(),true);
+            if(Gdx.input.isKeyPressed(Input.Keys.LEFT) && player.b2body.getLinearVelocity().x>=-36 )
+                player.b2body.applyLinearImpulse(new Vector2(-21f,0),player.b2body.getWorldCenter(),true);
+            if((enemy.b2body.getPosition().x-player.b2body.getPosition().x)<=70 && Timer%5==0 && enemy.Hurt==false  )
+                bool = true;
+
+
+            else
+                bool=false;
+            if((enemy.b2body.getPosition().x-player.b2body.getPosition().x)<=200 && (enemy.b2body.getPosition().x-player.b2body.getPosition().x)>=70 && enemy.b2body.getLinearVelocity().x>=-25 && enemy.attack==false)
+                enemy.b2body.applyLinearImpulse(new Vector2(-5f,0),player.b2body.getWorldCenter(),true);
+            if(Timer%15==0 && (enemy.b2body.getPosition().x-player.b2body.getPosition().x)<=200)
+                enemy.b2body.applyLinearImpulse(new Vector2(20f,20),player.b2body.getWorldCenter(),true);
+
+        if (collision.getDif(player.b2body.getPosition().x,enemy.b2body.getPosition().x, Collision.String.Barbarian,enemy.attack)==0)
+            isHurt=false;
+        else if(collision.getDif(player.b2body.getPosition().x,enemy.b2body.getPosition().x, Collision.String.Barbarian,enemy.attack)==20) {
+
+                isHurt = true;
+
+               // player.update(dt,isHurt);
+
+
+
+
+
+        }
+
+
+        if(collision.getDif(player.b2body.getPosition().x,enemy.b2body.getPosition().x,Collision.String.Barbarian,player.attack)==20)
+        {
+
+            enemyisHurt=true;
+            System.out.println(k);
+        }
+        else
+            enemyisHurt=false;
+
+
+
 
 
 
@@ -89,7 +152,13 @@ public class PlayScreen implements Screen {
      public void update(float dt){
         handleInput(dt);
         world.step(1/60f,9,2);
-        player.update(dt);
+        enemy.update(dt,bool,player.b2body.getPosition().x,k,enemyisHurt);
+        player.update(dt,isHurt);
+
+         //System.out.println(enemy.b2body.getPosition().x);
+        // System.out.println(player.b2body.getPosition().x);
+
+        hud.update(dt);
        gamecam.position.x= player.b2body.getPosition().x;
 
         gamecam.update();
@@ -110,10 +179,13 @@ public class PlayScreen implements Screen {
 
         renderer.render();
         //render our box debug line
-        b2dr.render(world,gamecam.combined);
+       // b2dr.render(world,gamecam.combined);
          game.batch.setProjectionMatrix(gamecam.combined);
          game.batch.begin();
-         player.draw(game.batch);
+
+         enemy.draw(game.batch);
+        player.draw(game.batch);
+
          game.batch.end();
 
 
