@@ -18,11 +18,11 @@ public class Hud implements Disposable {
     public Stage stage;
     private Viewport viewport;
 
-    private Integer WorldTimer;
+    private  Integer WorldTimer;
     private float timeCount;
-    private static Integer score;
-    private Label countdownLabel;
-    private static Label scoreLabel;
+    private  static Integer score;
+    private static Label countdownLabel;
+    private  static Label scoreLabel;
     private Label timeLabel;
     private Label levelLabel;
     private Label worldLabel;
@@ -31,17 +31,17 @@ public class Hud implements Disposable {
     public Hud(SpriteBatch sb){
         WorldTimer =300;
         timeCount = 0;
-        score=000000;
+        score=4000;
         viewport =new FillViewport(Demo.V_Width,Demo.V_Height,new OrthographicCamera());
         stage=new Stage(viewport,sb);
         Table table= new Table();
         table.top();
         table.setFillParent(true);
-        countdownLabel= new Label(String.format("%03d",WorldTimer),new Label.LabelStyle(new BitmapFont(), Color.WHITE));
-        scoreLabel=new Label(String.format("%06d",score),new Label.LabelStyle(new BitmapFont(), Color.RED));
+        countdownLabel= new Label(String.format("%03d",WorldTimer),new Label.LabelStyle(new BitmapFont(), Color.GOLDENROD));
+        scoreLabel=new Label(String.format("%04d",score),new Label.LabelStyle(new BitmapFont(), Color.RED));
         timeLabel=new Label("TIME",new Label.LabelStyle(new BitmapFont(), Color.WHITE));
 
-        levelLabel=new Label("1-1",new Label.LabelStyle(new BitmapFont(), Color.WHITE));
+        levelLabel=new Label("1-1",new Label.LabelStyle(new BitmapFont(), Color.GREEN));
         worldLabel=new Label("WORLD",new Label.LabelStyle(new BitmapFont(), Color.WHITE));
         marioLabel=  new Label("Warrior",new Label.LabelStyle(new BitmapFont(), Color.WHITE));
         table.add(marioLabel).expandX().padTop(10);
@@ -62,9 +62,24 @@ public class Hud implements Disposable {
             timeCount=0;
         }
     }
+
+    public int getTime(){
+        return WorldTimer;
+    }
+
+
+
+    public Viewport getViewport() {
+        return viewport;
+    }
+
     public static void addScore(int value){
         scoreLabel.setText(String.format("%06d",score));
         score+=value;
+    }
+
+    public int getScore(){
+        return score;
     }
 
     @java.lang.Override

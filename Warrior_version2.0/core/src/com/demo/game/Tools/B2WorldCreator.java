@@ -16,7 +16,7 @@ public class B2WorldCreator {
         Body body;
 
         //create ground bodies/fixtures
-        for(MapObject object: map.getLayers().get(5).getObjects().getByType(RectangleMapObject.class)){
+        for(MapObject object: map.getLayers().get(7).getObjects().getByType(RectangleMapObject.class)){
             Rectangle rect =((RectangleMapObject) object).getRectangle();
             /*bdef.type = BodyDef.BodyType.StaticBody;
             bdef.position.set(rect.getX()+rect.getWidth()/2,rect.getY()+rect.getHeight()/2);
@@ -29,6 +29,7 @@ public class B2WorldCreator {
 
 
         }
+
         //create moon_door bodies/fixtures
        // for(MapObject object: map.getLayers().get(8).getObjects().getByType(RectangleMapObject.class)){
            // Rectangle rect =((RectangleMapObject) object).getRectangle();

@@ -3,9 +3,12 @@ package com.demo.game;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.demo.game.Screens.Menu;
 import com.demo.game.Screens.PlayScreen;
 
 public class Demo extends Game {
@@ -13,7 +16,7 @@ public class Demo extends Game {
 	public static final int V_Height=300  ;
 	public static final int V_Width=600;
 	public static  final float PPM=100;
-
+ public static AssetManager assetManager;
 
 	public static final short DEFAULT_BIT=1;
 	public static final short WARRIOR_BIT=2;
@@ -26,7 +29,10 @@ public class Demo extends Game {
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
-	    setScreen(new PlayScreen(this));
+	    setScreen(new Menu(this));
+	    assetManager=new AssetManager();
+	    assetManager.load("soundTrack.mp3", Music.class);
+	    assetManager.finishLoading();
 	}
 
 	@Override

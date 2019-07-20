@@ -12,7 +12,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 import com.demo.game.Demo;
+import com.demo.game.Screens.GameOverSceen;
 import com.demo.game.Screens.PlayScreen;
+import com.demo.game.Screens.WinScene;
 
 public class Warrior extends Sprite {
     public enum State {FALLING, JUMPING, STANDING, RUNNING, ATTACKING, JATTACK, GLIDDING,HURT}
@@ -45,12 +47,13 @@ public class Warrior extends Sprite {
     private float stateTimer;
     public boolean jump_attack;
     public boolean attack;
-    private  boolean hurt;
-    private boolean combo;
+    public   boolean hurt;
+    public boolean combo;
     public boolean runningRight;
+    public float x;
 
 
-    public Warrior(World world, PlayScreen screen) {
+    public Warrior(World world, PlayScreen screen, float x) {
         mariostanding = new Texture("gothic-hero-idle.png");
         marioruning = new Texture("gothic-hero-run.png");
         marioJumpingUp = new Texture("gothic-hero-jump.png");
@@ -59,6 +62,147 @@ public class Warrior extends Sprite {
         mariocomboattacking = new Texture("gothic-hero-jump-attack.png");
         mariosliding = new Texture("gothic-hero-crouch.png");
         mariohurting= new Texture("gothic-hero-hurt.png");
+        this.x=x;
+
+
+
+        this.world = world;
+        currentState = State.STANDING;
+        previousState = State.STANDING;
+        stateTimer = 0;
+        runningRight = true;
+        attack = false;
+        combo = false;
+        hurt=false;
+        jump_attack=false;
+
+
+        Array<TextureRegion> frames = new Array<TextureRegion>();
+        for (int i = 0; i < 4; i++)
+            frames.add(new TextureRegion(mariostanding, i * 152/4, 0, 152/4, 48));
+        marioStand = new Animation(0.1f, frames);
+        frames.clear();
+
+        for (int i = 0; i < 12; i++)
+            frames.add(new TextureRegion(marioruning, i * 792/12, 0, 792/12, 48));
+        marioRun = new Animation(0.1f, frames);
+
+        frames.clear();
+        for (int i = 0; i < 3; i++)
+            frames.add(new TextureRegion(marioJumpingUp, i * 305 / 5, 0, 305/5, 77));
+        marioJumpUp = new Animation(0.2f, frames);
+        frames.clear();
+        for (int i = 3; i < 5; i++)
+            frames.add(new TextureRegion(marioFalling, i * 305/5, 0, 305 / 5, 77));
+        marioFall = new Animation(0.1f, frames);
+        frames.clear();
+
+        for (int i = 0; i < 6; i++)
+            frames.add(new TextureRegion(marioattacking, i * 576/6, 0, 576/6, 48));
+        marioAttack = new Animation(0.1f, frames);
+        frames.clear();
+
+        for (int i = 0; i < 6; i++)
+            frames.add(new TextureRegion(mariocomboattacking, i * 504/6, 0, 504/6, 80));
+        marioComboAttack = new Animation(0.1f, frames);
+        frames.clear();
+        for (int i = 0; i < 3; i++)
+            frames.add(new TextureRegion(mariosliding, i * 144 / 3, 0, 144 / 3, 48));
+        marioSLIDE = new Animation(0.05f, frames);
+        frames.clear();
+
+        for (int i = 0; i <3; i++)
+            frames.add(new TextureRegion(mariohurting, i * 144/3, 0, 144/3, 48));
+        marioHurt = new Animation(0.25f, frames);
+        frames.clear();
+
+        defineWarrior();
+
+        setBounds(0, 0, getbounds('x'), getbounds('y'));
+        setRegion(new TextureRegion(mariostanding, 0, 0, 232, 439));
+
+
+    }
+    public Warrior(World world, WinScene screen,float x) {
+        mariostanding = new Texture("gothic-hero-idle.png");
+        marioruning = new Texture("gothic-hero-run.png");
+        marioJumpingUp = new Texture("gothic-hero-jump.png");
+        marioFalling = new Texture("gothic-hero-jump.png");
+        marioattacking = new Texture("gothic-hero-attack.png");
+        mariocomboattacking = new Texture("gothic-hero-jump-attack.png");
+        mariosliding = new Texture("gothic-hero-crouch.png");
+        mariohurting= new Texture("gothic-hero-hurt.png");
+        this.x=x;
+
+
+
+        this.world = world;
+        currentState = State.STANDING;
+        previousState = State.STANDING;
+        stateTimer = 0;
+        runningRight = true;
+        attack = false;
+        combo = false;
+        hurt=false;
+        jump_attack=false;
+
+
+        Array<TextureRegion> frames = new Array<TextureRegion>();
+        for (int i = 0; i < 4; i++)
+            frames.add(new TextureRegion(mariostanding, i * 152/4, 0, 152/4, 48));
+        marioStand = new Animation(0.1f, frames);
+        frames.clear();
+
+        for (int i = 0; i < 12; i++)
+            frames.add(new TextureRegion(marioruning, i * 792/12, 0, 792/12, 48));
+        marioRun = new Animation(0.1f, frames);
+
+        frames.clear();
+        for (int i = 0; i < 3; i++)
+            frames.add(new TextureRegion(marioJumpingUp, i * 305 / 5, 0, 305/5, 77));
+        marioJumpUp = new Animation(0.2f, frames);
+        frames.clear();
+        for (int i = 3; i < 5; i++)
+            frames.add(new TextureRegion(marioFalling, i * 305/5, 0, 305 / 5, 77));
+        marioFall = new Animation(0.1f, frames);
+        frames.clear();
+
+        for (int i = 0; i < 6; i++)
+            frames.add(new TextureRegion(marioattacking, i * 576/6, 0, 576/6, 48));
+        marioAttack = new Animation(0.1f, frames);
+        frames.clear();
+
+        for (int i = 0; i < 6; i++)
+            frames.add(new TextureRegion(mariocomboattacking, i * 504/6, 0, 504/6, 80));
+        marioComboAttack = new Animation(0.1f, frames);
+        frames.clear();
+        for (int i = 0; i < 3; i++)
+            frames.add(new TextureRegion(mariosliding, i * 144 / 3, 0, 144 / 3, 48));
+        marioSLIDE = new Animation(0.05f, frames);
+        frames.clear();
+
+        for (int i = 0; i <3; i++)
+            frames.add(new TextureRegion(mariohurting, i * 144/3, 0, 144/3, 48));
+        marioHurt = new Animation(0.25f, frames);
+        frames.clear();
+
+        defineWarrior();
+
+        setBounds(0, 0, getbounds('x'), getbounds('y'));
+        setRegion(new TextureRegion(mariostanding, 0, 0, 232, 439));
+
+
+    }
+    public Warrior(World world, GameOverSceen screen, float x) {
+        mariostanding = new Texture("gothic-hero-idle.png");
+        marioruning = new Texture("gothic-hero-run.png");
+        marioJumpingUp = new Texture("gothic-hero-jump.png");
+        marioFalling = new Texture("gothic-hero-jump.png");
+        marioattacking = new Texture("gothic-hero-attack.png");
+        mariocomboattacking = new Texture("gothic-hero-jump-attack.png");
+        mariosliding = new Texture("gothic-hero-crouch.png");
+        mariohurting= new Texture("gothic-hero-hurt.png");
+        this.x=x;
 
 
 
@@ -175,12 +319,12 @@ public class Warrior extends Sprite {
             case STANDING:
             default:
                 x = b2body.getPosition().x - 20;
-                y = b2body.getPosition().y - 7;
+                y = b2body.getPosition().y - 30;
 
                 break;
             case ATTACKING:
                 x = b2body.getPosition().x - 40;
-                y = b2body.getPosition().y - 12;
+                y = b2body.getPosition().y - 30;
                 break;
         }
         if (p == 'x')
@@ -191,12 +335,12 @@ public class Warrior extends Sprite {
     }
 
     public void handleInput() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE))
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)&& hurt==false)
             attack = true;
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN))
+        if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN) && hurt==false)
             combo = true;
-        if (Gdx.input.isKeyJustPressed(Input.Keys.W))
+        if (Gdx.input.isKeyJustPressed(Input.Keys.W) && hurt==false)
             jump_attack= true;
 
 
@@ -207,8 +351,9 @@ public class Warrior extends Sprite {
         setPosition(getPos('x'), getPos('y'));
 
         setRegion(getFrame(dt));
+        System.out.println(hurt);
         //System.out.println(bool);
-        hurt=bool;
+       // hurt=bool;
         handleInput();
     }
 
@@ -253,12 +398,15 @@ public class Warrior extends Sprite {
 
         stateTimer = currentState == previousState ? stateTimer + dt : 0;
         previousState = currentState;
+        if (hurt== true && stateTimer > 0.75)
+           hurt = false;
         if (attack == true && stateTimer > 0.6)
             attack = false;
         if (combo == true && stateTimer > 1.0)
             combo = false;
         if (jump_attack == true && stateTimer > 0.6)
             jump_attack = false;
+
 
         return region;
 
@@ -277,7 +425,7 @@ public class Warrior extends Sprite {
         else if (attack == true) {
             return State.ATTACKING;
 
-        } else if (b2body.getLinearVelocity().y > 0)
+        } else if (b2body.getLinearVelocity().y > 0 && hurt==false)
             return State.JUMPING;
         else if (b2body.getLinearVelocity().y < 0)
             return State.FALLING;
@@ -295,13 +443,13 @@ public class Warrior extends Sprite {
 
     public void defineWarrior() {
         BodyDef bdef = new BodyDef();
-        bdef.position.set(60, 60);
+        bdef.position.set(x, 130);
         bdef.type = BodyDef.BodyType.DynamicBody;
         b2body = world.createBody(bdef);
 
         FixtureDef fdef = new FixtureDef();
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(0,7);
+        shape.setAsBox(0,30);
         fdef.filter.categoryBits= Demo.WARRIOR_BIT;
         fdef.filter.maskBits=Demo.DEFAULT_BIT | Demo.GROUND_BIT | Demo.DOOR_BIT; // ground doesnt work
         //fdef.filter.maskBits=Demo.DEFAULT_BIT;

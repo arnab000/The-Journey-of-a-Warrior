@@ -12,7 +12,7 @@ import com.demo.game.Screens.PlayScreen;
 
 public class Enemy extends Sprite {
 
-    public enum State {FALLING, JUMPING, STANDING, RUNNING, ATTACKING, JATTACK, GLIDDING,HURT};
+    public enum State {FALLING, JUMPING, STANDING, RUNNING, ATTACKING, JATTACK, GLIDDING,HURT,DEATH};
     public State currentState;
     public State previousState;
     public World world;
@@ -23,6 +23,7 @@ public class Enemy extends Sprite {
     private Texture enemyattacking;
     private Texture enemyrunning;
     private Texture enemydying;
+    private Texture enemydie;
 
 
 
@@ -31,11 +32,12 @@ public class Enemy extends Sprite {
     private Animation<TextureRegion> enemyAttack;
     private Animation<TextureRegion> enemyRun;
     private Animation<TextureRegion> enemyDeath;
-
+    private Animation<TextureRegion> enemydeath;
 
     private float stateTimer;
     public boolean attack;
     public boolean Hurt;
+    public boolean dead;
     private boolean runningRight;
 
     public Enemy(World world, PlayScreen screen,int x) {
@@ -43,6 +45,7 @@ public class Enemy extends Sprite {
         enemystanding= new Texture("demon-idle.png");
         enemyrunning=new Texture("demon-idle.png");
         enemydying =new Texture("demon-attack-no-breath.png");
+        enemydie= new Texture("demon-attack-no-breath.png");
 
 
         this.world = world;
@@ -52,6 +55,7 @@ public class Enemy extends Sprite {
         stateTimer = 0;
         runningRight = false;
         attack = false;
+        dead=false;
 
 
 
@@ -78,6 +82,11 @@ public class Enemy extends Sprite {
         enemyDeath = new Animation(0.1f, frames);
 
         frames.clear();
+        for (int i = 0; i < 20; i++)
+            frames.add(new TextureRegion(enemydie, i*1536/8, 0, 1536/8,176));
+        enemydeath = new Animation(0.1f, frames);
+
+        frames.clear();
 
         defineEnemy();
 
@@ -95,6 +104,7 @@ public class Enemy extends Sprite {
         switch (currentState) {
             case STANDING:
             case HURT:
+            case DEATH:
             default:
                 x = 960/6;
                 y = 144;
@@ -188,7 +198,9 @@ public class Enemy extends Sprite {
             case HURT:
                 region=enemyDeath.getKeyFrame(stateTimer);
                 break;
-
+            case DEATH:
+                region=enemydeath.getKeyFrame(stateTimer);
+                break;
 
         }
 
@@ -205,11 +217,13 @@ public class Enemy extends Sprite {
     }
 
     public State getState() {
-        if(Hurt==true)
+        if(dead==true)
+            return State.DEATH;
+        else if(Hurt==true)
             return State.HURT;
         else if (attack == true )
             return State.ATTACKING;
-        else if(b2body.getLinearVelocity().x!=0)
+        else if(b2body.getLinearVelocity().x!=0 || b2body.getLinearVelocity().y!=0)
             return State.RUNNING;
 
         else
